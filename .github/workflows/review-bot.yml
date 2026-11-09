@@ -29,7 +29,7 @@ jobs:
   # The model may do anything on this throwaway machine, which has no key that can
   # change the repository. Only the review/ folder leaves it.
   review:
-    if: true # OPT OUT: change true to false to turn the review bot off.
+    if: false # OPT OUT: change true to false to turn the review bot off.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
