@@ -2,7 +2,12 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
-import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
+import {
+  isPassable,
+  type Terrain,
+  terrainAt,
+  terrainYield,
+} from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -13,17 +18,21 @@ export type Direction = "north" | "south" | "east" | "west";
 export type GameState = {
   seed: number;
   player: Cell;
-  inventory: string[];
+  inventory: Record<string, number>;
   changed: Record<string, string>;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
-export type Command = { type: "move"; direction: Direction };
+export type Command =
+  | { type: "move"; direction: Direction }
+  | { type: "gather" };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
-  | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain };
+  | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
+  | { type: "gathered"; at: Cell; item: string }
+  | { type: "gather failed"; at: Cell; terrain: Terrain };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -32,12 +41,22 @@ const STEPS: Record<Direction, Cell> = {
   west: { x: -1, y: 0 },
 };
 
+function cellKey(cell: Cell): string {
+  return `${cell.x},${cell.y}`;
+}
+
+export function cellNow(state: GameState, cell: Cell): string | undefined {
+  const key = cellKey(cell);
+  return state.changed[key] ??
+    terrainYield(terrainAt(state.seed, cell.x, cell.y));
+}
+
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
   return {
     seed,
     player: { x: 0, y: 0 },
-    inventory: [],
+    inventory: {},
     changed: {},
   };
 }
@@ -47,7 +66,34 @@ export function apply(state: GameState, command: Command): GameEvent[] {
   switch (command.type) {
     case "move":
       return move(state, command.direction);
+    case "gather":
+      return gather(state);
   }
+}
+
+function gather(state: GameState): GameEvent[] {
+  const at = { ...state.player };
+  const key = cellKey(at);
+  if (state.changed[key] !== undefined) {
+    return [{
+      type: "gather failed",
+      at,
+      terrain: terrainAt(state.seed, at.x, at.y),
+    }];
+  }
+
+  const item = cellNow(state, at);
+  if (item === undefined) {
+    return [{
+      type: "gather failed",
+      at,
+      terrain: terrainAt(state.seed, at.x, at.y),
+    }];
+  }
+
+  state.inventory[item] = (state.inventory[item] ?? 0) + 1;
+  state.changed[key] = item;
+  return [{ type: "gathered", at, item }];
 }
 
 function move(state: GameState, direction: Direction): GameEvent[] {
