@@ -37,6 +37,16 @@ export class Controller {
   }
 
   private keyDown(event: KeyboardEvent) {
+    if (
+      (event.key === "e" || event.key === "E") && !event.ctrlKey &&
+      !event.metaKey && !event.altKey
+    ) {
+      if (event.repeat) return;
+      this.pressed = { type: "gather" };
+      this.next();
+      return;
+    }
+
     const direction = ARROWS[event.key];
     if (!direction || event.ctrlKey || event.metaKey || event.altKey) return;
     // Otherwise arrow keys would also scroll the page.
