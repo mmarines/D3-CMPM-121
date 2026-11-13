@@ -1,5 +1,11 @@
 import { assertEquals } from "@std/assert";
-import { apply, type GameState, isPassable, terrainAt } from "./mod.ts";
+import {
+  apply,
+  type GameState,
+  isPassable,
+  newGame,
+  terrainAt,
+} from "./mod.ts";
 
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
@@ -10,10 +16,21 @@ function besideEasternCell(passable: boolean): GameState {
   for (let x = 2; x < 10_000; x++) {
     const here = isPassable(terrainAt(SEED, x, 0));
     const east = isPassable(terrainAt(SEED, x + 1, 0));
-    if (here && east === passable) return { seed: SEED, player: { x, y: 0 } };
+    if (here && east === passable) {
+      return { ...newGame(SEED), player: { x, y: 0 } };
+    }
   }
   throw new Error("Found no suitable cell on this row.");
 }
+
+Deno.test("new games start with empty inventory and no changed cells", () => {
+  assertEquals(newGame(SEED), {
+    seed: SEED,
+    player: { x: 0, y: 0 },
+    inventory: [],
+    changed: {},
+  });
+});
 
 Deno.test("moving onto passable terrain moves the player", () => {
   const state = besideEasternCell(true);
