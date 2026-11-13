@@ -9,14 +9,14 @@ const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 600;
 const WALK_MS = 120;
 const BUMP_MS = 60;
-const MARKER_COLOR = 0xf5e6a8;
+const MARKER_COLOR = 0x875624;
 const BUMP_COLOR = 0xe0533d;
 
 const TERRAIN_COLORS: Record<Terrain, number> = {
-  grass: 0x5d9e4a,
-  forest: 0x2f6b3a,
-  water: 0x2d5f9e,
-  rock: 0x6e6a66,
+  desert: 0xfce4c2,
+  oasis: 0x30c97f,
+  lava: 0xed3713,
+  currents: 0xbab8b5,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
