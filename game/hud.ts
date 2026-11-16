@@ -30,11 +30,12 @@ export class Hud {
 
   show(event: GameEvent) {
     element("live").textContent = describe(event);
+    if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
     if (event.type === "gathered") {
       this.changed[`${event.at.x},${event.at.y}`] = event.item;
+      this.showPosition(event.at.x, event.at.y);
+      this.showInventory(event.inventory);
     }
-    if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
-    if (event.type === "gathered") this.showPosition(event.at.x, event.at.y);
   }
 
   private showPosition(x: number, y: number) {
@@ -42,5 +43,15 @@ export class Hud {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = this.changed[key] ??
       terrainAt(this.seed, x, y);
+  }
+
+  private showInventory(inventory: Record<string, number>) {
+    element("inventory").replaceChildren(
+      ...Object.entries(inventory).map(([item, count]) => {
+        const li = document.createElement("li");
+        li.textContent = `${item}: ${count}`;
+        return li;
+      }),
+    );
   }
 }
