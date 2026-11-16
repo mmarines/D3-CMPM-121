@@ -45,10 +45,11 @@ function cellKey(cell: Cell): string {
   return `${cell.x},${cell.y}`;
 }
 
+const GATHERED = "gathered";
+
 export function cellNow(state: GameState, cell: Cell): string | undefined {
-  const key = cellKey(cell);
-  return state.changed[key] ??
-    terrainYield(terrainAt(state.seed, cell.x, cell.y));
+  if (state.changed[cellKey(cell)] === GATHERED) return undefined;
+  return terrainYield(terrainAt(state.seed, cell.x, cell.y));
 }
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
@@ -73,15 +74,6 @@ export function apply(state: GameState, command: Command): GameEvent[] {
 
 function gather(state: GameState): GameEvent[] {
   const at = { ...state.player };
-  const key = cellKey(at);
-  if (state.changed[key] !== undefined) {
-    return [{
-      type: "gather failed",
-      at,
-      terrain: terrainAt(state.seed, at.x, at.y),
-    }];
-  }
-
   const item = cellNow(state, at);
   if (item === undefined) {
     return [{
@@ -90,9 +82,8 @@ function gather(state: GameState): GameEvent[] {
       terrain: terrainAt(state.seed, at.x, at.y),
     }];
   }
-
   state.inventory[item] = (state.inventory[item] ?? 0) + 1;
-  state.changed[key] = item;
+  state.changed[cellKey(at)] = GATHERED;
   return [{ type: "gathered", at, item }];
 }
 
