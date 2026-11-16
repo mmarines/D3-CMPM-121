@@ -14,6 +14,13 @@ function describe(event: GameEvent): string {
       return `gathered ${event.item} at ${event.at.x}, ${event.at.y}`;
     case "gather failed":
       return `gather failed at ${event.at.x}, ${event.at.y}`;
+    case "crafted":
+      return `crafted ${event.output}`;
+    case "craft failed":
+      return `craft failed: missing ${
+        Object.entries(event.missing).map(([item, count]) => `${count} ${item}`)
+          .join(", ")
+      }`;
   }
 }
 
@@ -36,6 +43,7 @@ export class Hud {
       this.showPosition(event.at.x, event.at.y);
       this.showInventory(event.inventory);
     }
+    if (event.type === "crafted") this.showInventory(event.inventory);
   }
 
   private showPosition(x: number, y: number) {

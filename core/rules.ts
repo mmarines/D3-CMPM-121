@@ -9,6 +9,8 @@ import {
   terrainYield,
 } from "./terrain.ts";
 
+import { type Recipe, RECIPES } from "./recipes.ts";
+
 export type Cell = { x: number; y: number };
 
 export type Direction = "north" | "south" | "east" | "west";
@@ -25,7 +27,8 @@ export type GameState = {
 // Command: https://gameprogrammingpatterns.com/command.html
 export type Command =
   | { type: "move"; direction: Direction }
-  | { type: "gather" };
+  | { type: "gather" }
+  | { type: "craft"; output: string };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
@@ -37,7 +40,9 @@ export type GameEvent =
     item: string;
     inventory: Record<string, number>;
   }
-  | { type: "gather failed"; at: Cell; terrain: Terrain };
+  | { type: "gather failed"; at: Cell; terrain: Terrain }
+  | { type: "crafted"; output: string; inventory: Record<string, number> }
+  | { type: "craft failed"; output: string; missing: Record<string, number> };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -74,7 +79,22 @@ export function apply(state: GameState, command: Command): GameEvent[] {
       return move(state, command.direction);
     case "gather":
       return gather(state);
+    case "craft":
+      return craft(state, command.output);
   }
+}
+
+// Missing Ingredients query
+export function missingFor(
+  state: GameState,
+  recipe: Recipe,
+): Record<string, number> {
+  const missing: Record<string, number> = {};
+  for (const [item, need] of Object.entries(recipe.inputs)) {
+    const have = state.inventory[item] ?? 0;
+    if (have < need) missing[item] = need - have;
+  }
+  return missing;
 }
 
 function gather(state: GameState): GameEvent[] {
@@ -90,6 +110,21 @@ function gather(state: GameState): GameEvent[] {
   state.inventory[item] = (state.inventory[item] ?? 0) + 1;
   state.changed[cellKey(at)] = GATHERED;
   return [{ type: "gathered", at, item, inventory: { ...state.inventory } }];
+}
+
+function craft(state: GameState, output: string): GameEvent[] {
+  const recipe = RECIPES.find((r) => r.output === output);
+  if (!recipe) return [];
+  const missing = missingFor(state, recipe);
+  if (Object.keys(missing).length > 0) {
+    return [{ type: "craft failed", output, missing }];
+  }
+  for (const [item, need] of Object.entries(recipe.inputs)) {
+    state.inventory[item] -= need;
+    if (state.inventory[item] === 0) delete state.inventory[item];
+  }
+  state.inventory[output] = (state.inventory[output] ?? 0) + 1;
+  return [{ type: "crafted", output, inventory: { ...state.inventory } }];
 }
 
 function move(state: GameState, direction: Direction): GameEvent[] {

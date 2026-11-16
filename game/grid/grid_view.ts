@@ -91,6 +91,9 @@ export class GridView extends Phaser.Scene {
       }
       case "gather failed":
         return Promise.resolve();
+      case "crafted":
+      case "craft failed":
+        return Promise.resolve();
       default:
         // A new event type fails to type-check here until it has a presentation.
         event satisfies never;
