@@ -92,6 +92,7 @@ body {
 }
 
 #recipes button {
+  white-space: pre-line;
   width: 100%;
   padding: 7px 8px;
   color: #4a3929;

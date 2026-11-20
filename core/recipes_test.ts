@@ -44,3 +44,13 @@ Deno.test("every recipe input can be gathered or made", () => {
     }
   }
 });
+
+Deno.test("recipes do not require their own output", () => {
+  for (const recipe of RECIPES) {
+    assertEquals(
+      Object.hasOwn(recipe.inputs, recipe.output),
+      false,
+      `${recipe.output} requires itself`,
+    );
+  }
+});

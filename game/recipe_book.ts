@@ -40,9 +40,9 @@ export class RecipeBook {
       const status = Object.keys(missing).length === 0
         ? "ready"
         : `missing ${list(missing)}`;
-      this.buttons[i].textContent = `${recipe.output} (${
+      this.buttons[i].textContent = `${recipe.output}\n(${
         list(recipe.inputs)
-      }): ${status}`;
+      }):\n ${status}`;
     });
   }
 }

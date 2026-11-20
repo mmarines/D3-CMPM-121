@@ -1,6 +1,6 @@
 export type Recipe = { output: string; inputs: Record<string, number> };
 
 export const RECIPES: Recipe[] = [
-  { output: "Book of Tides", inputs: { charcoal: 2, papyrus: 1 } },
-  { output: "Raft", inputs: { "Book of Tides": 1, papyrus: 2 } },
+  { output: "Lavawalker's Incantation", inputs: { charcoal: 2, papyrus: 1 } },
+  { output: "Glider's Plume", inputs: { "phoenix feather": 4, papyrus: 3 } },
 ];
