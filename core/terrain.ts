@@ -3,15 +3,27 @@
 
 export type Terrain = "desert" | "oasis" | "lava" | "currents";
 
+export type TerrainRule = { yields: string; opensWith?: string };
+
+export const TERRAIN_RULES: Record<Terrain, TerrainRule> = {
+  desert: { yields: "charcoal" },
+  oasis: { yields: "papyrus" },
+  lava: {
+    yields: "phoenix feather",
+    opensWith: "Lavawalker's Incantation",
+  },
+  currents: { yields: "wind's breath" },
+};
+
 export const TERRAIN_YIELDS: Record<Terrain, string> = {
-  desert: "charcoal",
-  oasis: "papyrus",
-  lava: "phoenix feather",
-  currents: "wind's breath",
+  desert: TERRAIN_RULES.desert.yields,
+  oasis: TERRAIN_RULES.oasis.yields,
+  lava: TERRAIN_RULES.lava.yields,
+  currents: TERRAIN_RULES.currents.yields,
 };
 
 export function terrainYield(terrain: Terrain): string {
-  return TERRAIN_YIELDS[terrain];
+  return TERRAIN_RULES[terrain].yields;
 }
 
 export function terrainAt(seed: number, x: number, y: number): Terrain {
@@ -24,8 +36,15 @@ export function terrainAt(seed: number, x: number, y: number): Terrain {
   return noise(seed + 2, x, y, 6) < 0.45 ? "desert" : "oasis";
 }
 
-export function isPassable(terrain: Terrain): boolean {
-  return terrain !== "lava" && terrain !== "currents";
+export function isPassable(
+  terrain: Terrain,
+  inventory: Record<string, number>,
+): boolean {
+  if (terrain === "lava") {
+    const opening = TERRAIN_RULES.lava.opensWith;
+    return opening !== undefined && (inventory[opening] ?? 0) > 0;
+  }
+  return terrain !== "currents";
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so

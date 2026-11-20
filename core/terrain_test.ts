@@ -32,11 +32,19 @@ Deno.test("no seed starts walled in", () => {
       for (const next of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
         const key = next.join();
         if (seen.has(key)) continue;
-        if (!isPassable(terrainAt(seed, next[0], next[1]))) continue;
+        if (!isPassable(terrainAt(seed, next[0], next[1]), {})) continue;
         seen.add(key);
         frontier.push({ x: next[0], y: next[1] });
       }
     }
     assert(seen.size >= 2000, `seed ${seed} stops at ${seen.size} cells`);
   }
+});
+
+Deno.test("lavawalker's incantation opens lava terrain", () => {
+  assertEquals(isPassable("lava", {}), false);
+  assertEquals(
+    isPassable("lava", { "Lavawalker's Incantation": 1 }),
+    true,
+  );
 });

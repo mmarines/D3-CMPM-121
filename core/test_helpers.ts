@@ -26,8 +26,8 @@ export function findCellOfTerrain(
 
 export function besideEasternCell(passable: boolean, seed = SEED): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = isPassable(terrainAt(seed, x, 0));
-    const east = isPassable(terrainAt(seed, x + 1, 0));
+    const here = isPassable(terrainAt(seed, x, 0), {});
+    const east = isPassable(terrainAt(seed, x + 1, 0), {});
     if (here && east === passable) {
       return { ...newGame(seed), player: { x, y: 0 } };
     }
