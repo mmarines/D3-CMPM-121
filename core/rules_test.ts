@@ -8,6 +8,7 @@ Deno.test("new games start with empty inventory and no changed cells", () => {
     player: { x: 0, y: 0 },
     inventory: {},
     changed: {},
+    ended: false,
   });
 });
 

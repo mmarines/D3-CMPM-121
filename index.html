@@ -11,6 +11,7 @@
     <main id="app">
       <div id="grid"></div>
       <aside id="hud">
+        <p id="goal">Goal: write The Last Chronicle.</p>
         <dl>
           <dt>Position</dt>
           <dd id="position"></dd>
@@ -18,8 +19,11 @@
           <dd id="terrain"></dd>
         </dl>
         <ul id="inventory"></ul>
-        <ul id ="recipes"></ul>
+        <ul id="recipes"></ul>
         <p id="live" aria-live="polite"></p>
+        <div id="banner" hidden>
+          The Last Chronicle has been found. You have completed the game!
+        </div>
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>
     </main>

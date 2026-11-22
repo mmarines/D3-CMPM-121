@@ -9,7 +9,7 @@ import {
   terrainYield,
 } from "./terrain.ts";
 
-import { type Recipe, RECIPES } from "./recipes.ts";
+import { CAPSTONE, type Recipe, RECIPES } from "./recipes.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -22,6 +22,7 @@ export type GameState = {
   player: Cell;
   inventory: Record<string, number>;
   changed: Record<string, string>;
+  ended: boolean;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -42,7 +43,8 @@ export type GameEvent =
   }
   | { type: "gather failed"; at: Cell; terrain: Terrain }
   | { type: "crafted"; output: string; inventory: Record<string, number> }
-  | { type: "craft failed"; output: string; missing: Record<string, number> };
+  | { type: "craft failed"; output: string; missing: Record<string, number> }
+  | { type: "ended" };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -69,11 +71,14 @@ export function newGame(seed: number): GameState {
     player: { x: 0, y: 0 },
     inventory: {},
     changed: {},
+    ended: false,
   };
 }
 
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
+  // Once the game has ended, nothing can change it.
+  if (state.ended) return [];
   switch (command.type) {
     case "move":
       return move(state, command.direction);
@@ -124,7 +129,16 @@ function craft(state: GameState, output: string): GameEvent[] {
     if (state.inventory[item] === 0) delete state.inventory[item];
   }
   state.inventory[output] = (state.inventory[output] ?? 0) + 1;
-  return [{ type: "crafted", output, inventory: { ...state.inventory } }];
+  const crafted: GameEvent = {
+    type: "crafted",
+    output,
+    inventory: { ...state.inventory },
+  };
+  if (output === CAPSTONE) {
+    state.ended = true;
+    return [crafted, { type: "ended" }];
+  }
+  return [crafted];
 }
 
 function move(state: GameState, direction: Direction): GameEvent[] {

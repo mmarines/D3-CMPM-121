@@ -30,6 +30,8 @@ function describe(event: GameEvent): string {
         Object.entries(event.missing).map(([item, count]) => `${count} ${item}`)
           .join(", ")
       }`;
+    case "ended":
+      return "Game complete";
   }
 }
 
@@ -37,6 +39,7 @@ function describe(event: GameEvent): string {
 // tools can read. It changes only as events play.
 export class Hud {
   private readonly seed: number;
+  private changed: Record<string, string> = {};
 
   constructor(state: GameState) {
     this.seed = state.seed;
@@ -47,15 +50,20 @@ export class Hud {
     element("live").textContent = describe(event);
     if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
     if (event.type === "gathered") {
+      this.changed[`${event.at.x},${event.at.y}`] = event.item;
       this.showPosition(event.at.x, event.at.y);
       this.showInventory(event.inventory);
     }
     if (event.type === "crafted") this.showInventory(event.inventory);
+    if (event.type === "ended") {
+      element("banner").hidden = false;
+    }
   }
 
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
-    element("terrain").textContent = terrainAt(this.seed, x, y);
+    element("terrain").textContent = this.changed[`${x},${y}`] ??
+      terrainAt(this.seed, x, y);
   }
 
   private showInventory(inventory: Record<string, number>) {

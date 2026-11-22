@@ -154,4 +154,26 @@ body {
     transparent 55%,
     rgb(0 0 0 / 0.5) 100%
   );
+
+  #goal {
+    margin: 0;
+    padding: 8px 10px;
+    font: italic 15px Georgia, serif;
+    color: #59442f;
+    background: #f4ead3;
+    border: 1px solid #cbb891;
+    border-radius: 7px;
+  }
+
+  #banner {
+    padding: 14px 12px;
+    text-align: center;
+    font: 700 17px Georgia, serif;
+    letter-spacing: 0.02em;
+    color: #f4ead3;
+    background: linear-gradient(#8a3b1c, #5c2410);
+    border: 2px solid #c7ad81;
+    border-radius: 7px;
+    box-shadow: 0 0 18px rgb(217 83 30 / 0.55);
+  }
 }
