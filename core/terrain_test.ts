@@ -48,3 +48,11 @@ Deno.test("lavawalker's incantation opens lava terrain", () => {
     true,
   );
 });
+
+Deno.test("glider's plume opens currents terrain", () => {
+  assertEquals(isPassable("currents", {}), false);
+  assertEquals(
+    isPassable("currents", { "Glider's Plume": 1 }),
+    true,
+  );
+});

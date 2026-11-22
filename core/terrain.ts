@@ -12,7 +12,10 @@ export const TERRAIN_RULES: Record<Terrain, TerrainRule> = {
     yields: "phoenix feather",
     opensWith: "Lavawalker's Incantation",
   },
-  currents: { yields: "wind's breath" },
+  currents: {
+    yields: "wind's breath",
+    opensWith: "Glider's Plume",
+  },
 };
 
 export const TERRAIN_YIELDS: Record<Terrain, string> = {
@@ -40,11 +43,11 @@ export function isPassable(
   terrain: Terrain,
   inventory: Record<string, number>,
 ): boolean {
-  if (terrain === "lava") {
-    const opening = TERRAIN_RULES.lava.opensWith;
-    return opening !== undefined && (inventory[opening] ?? 0) > 0;
+  const opening = TERRAIN_RULES[terrain].opensWith;
+  if (opening !== undefined) {
+    return (inventory[opening] ?? 0) > 0;
   }
-  return terrain !== "currents";
+  return true;
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so
