@@ -1,4 +1,5 @@
 import {
+  canCraft,
   type Command,
   type GameState,
   missingFor,
@@ -36,10 +37,10 @@ export class RecipeBook {
 
   update() {
     RECIPES.forEach((recipe, i) => {
-      const missing = missingFor(this.state, recipe);
-      const status = Object.keys(missing).length === 0
-        ? "ready"
-        : `missing ${list(missing)}`;
+      const ready = canCraft(this.state, recipe);
+      const missing = ready ? {} : missingFor(this.state, recipe);
+      const status = ready ? "ready" : `missing ${list(missing)}`;
+      this.buttons[i].disabled = !ready;
       this.buttons[i].textContent = `${recipe.output}\n(${
         list(recipe.inputs)
       }):\n ${status}`;

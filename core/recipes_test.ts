@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { apply, newGame, RECIPES } from "./mod.ts";
+import { apply, canCraft, newGame, RECIPES } from "./mod.ts";
 import { SEED } from "./test_helpers.ts";
 
 Deno.test("crafting with enough inputs spends them and adds the output", () => {
@@ -57,4 +57,14 @@ Deno.test("recipes do not require their own output", () => {
       `${recipe.output} requires itself`,
     );
   }
+});
+
+Deno.test("the core says when a recipe can be crafted", () => {
+  const recipe = RECIPES[0];
+  const state = newGame(SEED);
+
+  assertEquals(canCraft(state, recipe), false);
+
+  state.inventory = { ...recipe.inputs };
+  assertEquals(canCraft(state, recipe), true);
 });

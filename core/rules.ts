@@ -102,6 +102,10 @@ export function missingFor(
   return missing;
 }
 
+export function canCraft(state: GameState, recipe: Recipe): boolean {
+  return Object.keys(missingFor(state, recipe)).length === 0;
+}
+
 function gather(state: GameState): GameEvent[] {
   const at = { ...state.player };
   const item = cellNow(state, at);
