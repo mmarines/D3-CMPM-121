@@ -40,7 +40,6 @@ export class RecipeBook {
       const ready = canCraft(this.state, recipe);
       const missing = ready ? {} : missingFor(this.state, recipe);
       const status = ready ? "ready" : `missing ${list(missing)}`;
-      this.buttons[i].disabled = !ready;
       this.buttons[i].textContent = `${recipe.output}\n(${
         list(recipe.inputs)
       }):\n ${status}`;

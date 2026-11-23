@@ -4,38 +4,35 @@ import { isPassable, type Terrain, TERRAIN_RULES } from "./terrain.ts";
 // Repeatedly adds every available material until the set stops growing.
 // A plain function parameter lets tests provide broken recipe tables.
 export function canReach(recipes: readonly Recipe[]): Recipe[] {
-  const available = new Map<string, number>();
+  const reached = new Set<string>();
+  const made = new Set<Recipe>();
 
   let changed = true;
   while (changed) {
     changed = false;
 
-    const inventory = Object.fromEntries(available);
+    const inventory = Object.fromEntries(
+      [...reached].map((item) => [item, 1]),
+    );
 
     for (const [terrain, rule] of Object.entries(TERRAIN_RULES)) {
-      if (isPassable(terrain as Terrain, inventory)) {
-        if (!available.has(rule.yields)) {
-          // Gatherable terrain yields can be collected repeatedly.
-          available.set(rule.yields, Number.POSITIVE_INFINITY);
-          changed = true;
-        }
+      if (
+        isPassable(terrain as Terrain, inventory) && !reached.has(rule.yields)
+      ) {
+        reached.add(rule.yields);
+        changed = true;
       }
     }
 
     for (const recipe of recipes) {
-      if (available.has(recipe.output)) continue;
-      if (
-        Object.entries(recipe.inputs).every(([item, count]) =>
-          (available.get(item) ?? 0) >= count
-        )
-      ) {
-        // Craftable outputs can also be made again if their ingredients
-        // remain gatherable or craftable.
-        available.set(recipe.output, Number.POSITIVE_INFINITY);
+      if (made.has(recipe)) continue;
+      if (Object.keys(recipe.inputs).every((item) => reached.has(item))) {
+        made.add(recipe);
+        reached.add(recipe.output);
         changed = true;
       }
     }
   }
 
-  return recipes.filter((recipe) => !available.has(recipe.output));
+  return recipes.filter((recipe) => !made.has(recipe));
 }
